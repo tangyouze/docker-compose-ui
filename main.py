@@ -36,6 +36,9 @@ app = Flask(__name__, static_url_path='')
 projects = find_yml_files(YML_PATH)
 
 logging.debug(projects)
+logging.getLogger("requests").setLevel(logging.WARNING)
+logging.getLogger("urllib3").setLevel(logging.WARNING)
+
 
 
 def get_project_with_name(name):

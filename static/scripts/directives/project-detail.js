@@ -1,7 +1,26 @@
 'use strict';
 
+
 angular.module('composeUiApp')
-  .directive('projectDetail', function ($resource, $log, projectService, $window) {
+  .directive('ngConfirmClick', [
+    function () {
+      return {
+        link: function (scope, element, attr) {
+          var msg = attr.ngConfirmClick || "Are you sure?";
+          var clickAction = attr.ngConfirmClick;
+          element.bind('click', function (event) {
+            if (window.confirm(msg)) {
+              console.log('apply');
+              scope.$apply(clickAction);
+            }
+          });
+        }
+      };
+    }]);
+
+
+angular.module('composeUiApp')
+  .directive('projectDetail', function ($resource, $log, projectService, $window, $interval) {
     return {
       restrict: 'E',
       scope: {
@@ -14,22 +33,34 @@ angular.module('composeUiApp')
         var Project = $resource('api/v1/projects/:id');
         var Host = $resource('api/v1/host');
         var Yml = $resource('api/v1/projects/yml/:id');
+        var refresh = function (val) {
+          $log.debug('refresh ' + val);
+          Project.get({id: val}, function (data) {
+            $scope.services = projectService.groupByService(data);
+          }, function (err) {
+            alertify.alert(err.data);
+          });
+
+          Host.get(function (data) {
+            var host = data.host;
+            $scope.hostName = host ? host.split(':')[0] : null;
+          });
+        };
+
+        var stop = $interval(function () {
+          refresh($scope.projectId);
+        }, 1000);
+        console.log('listen destroy');
+        $scope.$on('$destroy', function () {
+          console.log('destroy');
+          $interval.cancel(stop);
+        });
+
 
         $scope.$watch('projectId', function (val) {
           if (val) {
-            $log.debug('refresh ' + val);
-            Project.get({id: val}, function (data) {
-              $scope.services = projectService.groupByService(data);
-            }, function (err) {
-              alertify.alert(err.data);
-            });
-
-            Host.get(function (data) {
-              var host = data.host;
-              $scope.hostName = host ? host.split(':')[0] : null;
-            });
+            refresh(val);
           }
-
         });
 
         var Logs = $resource('api/v1/logs/:id/:container/:limit');
