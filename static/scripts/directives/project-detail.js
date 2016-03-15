@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('composeUiApp')
-  .directive('projectDetail', function($resource, $log, projectService, $window){
+  .directive('projectDetail', function ($resource, $log, projectService, $window) {
     return {
       restrict: 'E',
       scope: {
@@ -9,7 +9,7 @@ angular.module('composeUiApp')
         path: '='
       },
       templateUrl: 'views/project-detail.html',
-      controller: function($scope) {
+      controller: function ($scope) {
 
         var Project = $resource('api/v1/projects/:id');
         var Host = $resource('api/v1/host');
@@ -33,7 +33,25 @@ angular.module('composeUiApp')
         });
 
         var Logs = $resource('api/v1/logs/:id/:container/:limit');
+        var Action = $resource('api/v1/:action/:id/:container');
 
+        $scope.stopContainer = function (id) {
+          Action.get({id: $scope.projectId, action: 'stop', container: id}, function (data) {
+            console.log('stop');
+          });
+        };
+
+        $scope.startContainer = function (id) {
+          Action.get({id: $scope.projectId, action: 'start', container: id}, function (data) {
+            console.log('start');
+          });
+        };
+
+        $scope.restartContainer = function (id) {
+          Action.get({id: $scope.projectId, action: 'restart', container: id}, function (data) {
+            console.log('restart');
+          });
+        };
         $scope.displayLogs = function (id) {
           Logs.get({id: $scope.projectId, limit: 100, container: id}, function (data) {
             $scope.containerLogs = id;

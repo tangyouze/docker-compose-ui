@@ -23,6 +23,7 @@ from scripts.find_yml import find_yml_files
 from scripts.requires_auth import requires_auth, authentication_enabled, \
     disable_authentication, set_authentication
 from docopt import docopt as __docopt
+
 docopt = __docopt(__doc__)
 
 # Flask Application
@@ -83,9 +84,9 @@ def run_service(project, service_id):
     container.start()
 
     return jsonify( \
-        command='run %s/%s' % (project, service_id), \
-        name=container.name, \
-        id=container.id \
+            command='run %s/%s' % (project, service_id), \
+            name=container.name, \
+            id=container.id \
         )
 
 
@@ -107,18 +108,18 @@ def project_container(name, container_id):
     project = get_project_with_name(name)
     container = get_container_from_id(project.client, container_id)
     return jsonify(
-        id=container.id,
-        short_id=container.short_id,
-        human_readable_command=container.human_readable_command,
-        name=container.name,
-        name_without_project=container.name_without_project,
-        number=container.number,
-        ports=container.ports,
-        ip=container.get('NetworkSettings.IPAddress'),
-        labels=container.labels,
-        log_config=container.log_config,
-        image=container.image,
-        environment=container.environment
+            id=container.id,
+            short_id=container.short_id,
+            human_readable_command=container.human_readable_command,
+            name=container.name,
+            name_without_project=container.name_without_project,
+            number=container.number,
+            ports=container.ports,
+            ip=container.get('NetworkSettings.IPAddress'),
+            labels=container.labels,
+            log_config=container.log_config,
+            image=container.image,
+            environment=container.environment
     )
 
 
@@ -169,10 +170,10 @@ def up_():
     containers = get_project_with_name(name).up()
     logging.debug(containers)
     return jsonify(
-        {
-            'command': 'up',
-            'containers': map(lambda container: container.name, containers)
-        })
+            {
+                'command': 'up',
+                'containers': map(lambda container: container.name, containers)
+            })
 
 
 @app.route(API_V1 + "build", methods=['POST'])
@@ -294,6 +295,42 @@ def container_logs(name, container_id, limit):
     container = get_container_from_id(project.client, container_id)
     lines = container.logs(timestamps=True, tail=limit).split('\n')
     return jsonify(logs=lines)
+
+
+@app.route(API_V1 + "stop/<name>/<container_id>", methods=['GET'])
+def stop_container(name, container_id):
+    """
+    docker-compose logs of a specific container
+    """
+    project = get_project_with_name(name)
+    container = get_container_from_id(project.client, container_id)
+    res = container.stop()
+    print(res)
+    return jsonify({'error': 0})
+
+
+@app.route(API_V1 + "start/<name>/<container_id>", methods=['GET'])
+def start_container(name, container_id):
+    """
+    docker-compose logs of a specific container
+    """
+    project = get_project_with_name(name)
+    container = get_container_from_id(project.client, container_id)
+    res = container.start()
+    print(res)
+    return jsonify({'error': 0})
+
+
+@app.route(API_V1 + "restart/<name>/<container_id>", methods=['GET'])
+def restart_container(name, container_id):
+    """
+    docker-compose logs of a specific container
+    """
+    project = get_project_with_name(name)
+    container = get_container_from_id(project.client, container_id)
+    res = container.restart()
+    print(res)
+    return jsonify({'error': 0})
 
 
 @app.route(API_V1 + "host", methods=['GET'])

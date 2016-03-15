@@ -7,6 +7,7 @@ from compose.container import Container
 from compose.cli.command import get_project as compose_get_project, get_config_path_from_options
 from compose.config.config import get_default_config_files
 
+
 def ps_(project):
     """
     containers status
@@ -33,6 +34,7 @@ def get_container_from_id(client, container_id):
     """
     return Container.from_id(client, container_id)
 
+
 def get_volumes(container):
     """
     retrieve container volumes details
@@ -41,16 +43,18 @@ def get_volumes(container):
     volumes_rw = container.get('VolumesRW')
 
     items = map(lambda volume: \
-        dict(write=volumes_rw[volume], dest=volume, src=volumes[volume]), \
-        volumes if volumes else [])
+                    dict(write=volumes_rw[volume], dest=volume, src=volumes[volume]), \
+                volumes if volumes else [])
 
     return items
+
 
 def get_yml_path(path):
     """
     get path of docker-compose.yml file
     """
     return get_default_config_files(path)[0]
+
 
 def get_project(path):
     """

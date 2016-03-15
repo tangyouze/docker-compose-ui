@@ -1,4 +1,4 @@
-<h3>{{projectId}}</h3>
+<h3>{{ projectId }}</h3>
 
 <p>
   <button class="btn btn-sm btn-info" ng-hide="ymlData" ng-click="yml()">view docker-compose.yml</button>
@@ -6,7 +6,7 @@
 </p>
 
 <pre class="text-left" ng-show="ymlData">
-  {{ymlData}}
+  {{ ymlData }}
 </pre>
 
 <h1 ng-show="working">
@@ -22,41 +22,44 @@
   <div ng-repeat="(id, service) in services">
     <div class="row">
       <h5>
-        {{id}}
+          {{ id }}
         <button class="btn btn-sm btn-default" ng-click="scale(id)"><span class="glyphicon glyphicon-resize-full"></span> scale</button>
       </h5>
     </div>
     <div class="row service service-{{$index % 16}}">
-      <div class="col-md-6" ng-class="{'col-md-offset-3': service.length === 1}"  ng-repeat="container in service">
+      <div class="col-md-6" ng-class="{'col-md-offset-3': service.length === 1}" ng-repeat="container in service">
 
         <div class="panel" ng-class="{'active': container.is_running, 'off': !container.is_running}">
           <div class="panel-heading">
             <span ng-class="{'text-muted': !container.is_running}">
-              {{container.name_without_project}}
+              {{ container.name_without_project }}
             </span>
+            <button class="btn btn-xs btn-inverse" ng-click="restartContainer(container.name)">restart</button>
+            <button class="btn btn-xs btn-inverse" ng-click="startContainer(container.name)">start</button>
+            <button class="btn btn-xs btn-inverse" ng-click="stopContainer(container.name)">stop</button>
             <button class="btn btn-xs btn-inverse" ng-click="displayLogs(container.name)">logs</button>
-            <a class="btn btn-xs btn-inverse" ng-href="#/project/{{projectId}}/{{container.name}}">details</a>
+            <a class="btn btn-xs btn-inverse" ng-href="#/project/{{ projectId }}/{{ container.name }}">details</a>
           </div>
           <div class="panel-body">
 
             <h6 ng-hide="container.volumes.length === 0"><span class="glyphicon glyphicon glyphicon-hdd"></span> Volumes</h6>
             <ul class="list-unstyled">
               <li ng-repeat="volume in container.volumes">
-                <span ng-attr-title="{{volume.src}}">{{volume.src | trim : 12}}</span> :
-                <span ng-attr-title="{{volume.dest}}">{{volume.dest | trim : 12}}</span>
-                <span class="label label-default">{{volume.write ? "read-write" : "readonly"}}</span>
+                <span ng-attr-title="{{ volume.src }}">{{ volume.src | trim : 12}}</span> :
+                <span ng-attr-title="{{ volume.dest }}">{{ volume.dest | trim : 12}}</span>
+                <span class="label label-default">{{ volume.write ? "read-write" : "readonly"}}</span>
               </li>
             </ul>
             <span ng-show="container.is_running">
               <h6 ng-show="container.ports"><span class="glyphicon glyphicon glyphicon-transfer"></span> Network</h6>
               <p ng-repeat="(internal, host) in container.ports">
-                <span ng-hide="host">{{internal}}</span>
+                <span ng-hide="host">{{ internal }}</span>
                 <span ng-repeat="mapping in host">
-                  {{mapping.HostPort}} : {{internal}}
+                  {{ mapping.HostPort }} : {{ internal }}
                 </span>
               </p>
             </span>
-            <span ng-hide="container.is_running">{{container.state}}</span>
+            <span ng-hide="container.is_running">{{ container.state }}</span>
           </div>
         </div><!-- /.panel -->
 
@@ -68,10 +71,10 @@
       <div class="modal-content">
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-          <h4 class="modal-title">{{containerLogs}} logs</h4>
+          <h4 class="modal-title">{{ containerLogs }} logs</h4>
         </div>
         <div class="modal-body">
-          <pre class="text-left logs">{{logs.join("\n")}}</pre>
+          <pre class="text-left logs">{{ logs.join("\n") }}</pre>
         </div>
         <div class="modal-footer">
           <button ng-click="displayLogs(containerLogs)" class="btn btn-default"><span class="glyphicon glyphicon-refresh"></span> refresh</button>
