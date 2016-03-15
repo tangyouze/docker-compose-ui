@@ -1,5 +1,13 @@
 """
 Docker Compose UI, flask based application
+
+Usage:
+    app.py [options]
+
+Options:
+    --port=<port>    port [default: 5000]
+    --yaml=<yaml>    port [default: .]
+    --debug          debug or not
 """
 
 from compose.service import ImageType
@@ -13,11 +21,13 @@ from flask import Flask, jsonify, request
 from scripts.bridge import ps_, get_project, get_container_from_id, get_yml_path
 from scripts.find_yml import find_yml_files
 from scripts.requires_auth import requires_auth, authentication_enabled, \
-  disable_authentication, set_authentication
+    disable_authentication, set_authentication
+from docopt import docopt as __docopt
+docopt = __docopt(__doc__)
 
 # Flask Application
 API_V1 = '/api/v1/'
-YML_PATH = '/opt/docker-compose-projects'
+YML_PATH = docopt['--yaml']
 logging.basicConfig(level=logging.DEBUG)
 app = Flask(__name__, static_url_path='')
 
@@ -34,6 +44,7 @@ def get_project_with_name(name):
     path = projects[name]
     return get_project(path)
 
+
 # REST endpoints
 
 @app.route(API_V1 + "projects", methods=['GET'])
@@ -45,6 +56,7 @@ def list_projects():
     projects = find_yml_files(YML_PATH)
     return jsonify(projects=projects)
 
+
 @app.route(API_V1 + "projects/<name>", methods=['GET'])
 def project_containers(name):
     """
@@ -53,6 +65,7 @@ def project_containers(name):
     project = get_project_with_name(name)
     containers = ps_(project)
     return jsonify(containers=containers)
+
 
 @app.route(API_V1 + "projects/<project>/<service_id>", methods=['POST'])
 @requires_auth
@@ -69,11 +82,12 @@ def run_service(project, service_id):
         .create_container(one_off=True, command=command)
     container.start()
 
-    return jsonify(\
+    return jsonify( \
         command='run %s/%s' % (project, service_id), \
         name=container.name, \
         id=container.id \
         )
+
 
 @app.route(API_V1 + "projects/yml/<name>", methods=['GET'])
 def project_yml(name):
@@ -83,6 +97,7 @@ def project_yml(name):
     path = get_yml_path(projects[name])
     with open(path) as data_file:
         return jsonify(yml=data_file.read())
+
 
 @app.route(API_V1 + "projects/<name>/<container_id>", methods=['GET'])
 def project_container(name, container_id):
@@ -104,7 +119,8 @@ def project_container(name, container_id):
         log_config=container.log_config,
         image=container.image,
         environment=container.environment
-        )
+    )
+
 
 @app.route(API_V1 + "projects/<name>", methods=['DELETE'])
 @requires_auth
@@ -115,6 +131,7 @@ def kill(name):
     get_project_with_name(name).kill()
     return jsonify(command='kill')
 
+
 @app.route(API_V1 + "projects", methods=['PUT'])
 @requires_auth
 def pull():
@@ -124,6 +141,7 @@ def pull():
     name = loads(request.data)["id"]
     get_project_with_name(name).pull()
     return jsonify(command='pull')
+
 
 @app.route(API_V1 + "services", methods=['PUT'])
 @requires_auth
@@ -140,6 +158,7 @@ def scale():
     project.get_service(service_name).scale(desired_num=int(num))
     return jsonify(command='scale')
 
+
 @app.route(API_V1 + "projects", methods=['POST'])
 @requires_auth
 def up_():
@@ -155,6 +174,7 @@ def up_():
             'containers': map(lambda container: container.name, containers)
         })
 
+
 @app.route(API_V1 + "build", methods=['POST'])
 @requires_auth
 def build():
@@ -165,11 +185,12 @@ def build():
     name = json["id"]
 
     dic = dict(no_cache=json["no_cache"] if "no_cache" in json \
-      else None, pull=json["pull"] if "pull" in json else None)
+        else None, pull=json["pull"] if "pull" in json else None)
 
     get_project_with_name(name).build(**dic)
 
     return jsonify(command='build')
+
 
 @app.route(API_V1 + "create", methods=['POST'])
 @requires_auth
@@ -197,7 +218,7 @@ def search():
     """
     query = loads(request.data)['query']
     response = requests.get('https://www.composeregistry.com/api/v1/search', \
-        params={'query': query}, headers={'x-key': 'default'})
+                            params={'query': query}, headers={'x-key': 'default'})
     if response.status_code == 200:
         return jsonify(response.json())
     else:
@@ -213,7 +234,7 @@ def yml():
     """
     item_id = loads(request.data)['id']
     response = requests.get('https://www.composeregistry.com/api/v1/yml', \
-        params={'id': item_id}, headers={'x-key': 'default'})
+                            params={'id': item_id}, headers={'x-key': 'default'})
     return jsonify(response.json())
 
 
@@ -227,6 +248,7 @@ def start():
     get_project_with_name(name).start()
     return jsonify(command='start')
 
+
 @app.route(API_V1 + "stop", methods=['POST'])
 @requires_auth
 def stop():
@@ -237,6 +259,7 @@ def stop():
     get_project_with_name(name).stop()
     return jsonify(command='stop')
 
+
 @app.route(API_V1 + "down", methods=['POST'])
 @requires_auth
 def down():
@@ -246,6 +269,7 @@ def down():
     name = loads(request.data)["id"]
     get_project_with_name(name).down(ImageType.none, None)
     return jsonify(command='down')
+
 
 @app.route(API_V1 + "logs/<name>", defaults={'limit': "all"}, methods=['GET'])
 @app.route(API_V1 + "logs/<name>/<int:limit>", methods=['GET'])
@@ -259,6 +283,7 @@ def logs(name, limit):
 
     return jsonify(logs=lines)
 
+
 @app.route(API_V1 + "logs/<name>/<container_id>", defaults={'limit': "all"}, methods=['GET'])
 @app.route(API_V1 + "logs/<name>/<container_id>/<int:limit>", methods=['GET'])
 def container_logs(name, container_id, limit):
@@ -269,6 +294,7 @@ def container_logs(name, container_id, limit):
     container = get_container_from_id(project.client, container_id)
     lines = container.logs(timestamps=True, tail=limit).split('\n')
     return jsonify(logs=lines)
+
 
 @app.route(API_V1 + "host", methods=['GET'])
 def host():
@@ -295,12 +321,14 @@ def set_host():
         os.environ['DOCKER_HOST'] = new_host
         return jsonify(host=new_host)
 
+
 @app.route(API_V1 + "authentication", methods=['GET'])
 def authentication():
     """
     check if basic authentication is enabled
     """
     return jsonify(enabled=authentication_enabled())
+
 
 @app.route(API_V1 + "authentication", methods=['DELETE'])
 @requires_auth
@@ -310,6 +338,7 @@ def disable_basic_authentication():
     """
     disable_authentication()
     return jsonify(enabled=False)
+
 
 @app.route(API_V1 + "authentication", methods=['POST'])
 @requires_auth
@@ -321,6 +350,7 @@ def enable_basic_authentication():
     set_authentication(data["username"], data["password"])
     return jsonify(enabled=True)
 
+
 # static resources
 @app.route("/")
 def index():
@@ -328,6 +358,7 @@ def index():
     index.html
     """
     return app.send_static_file('index.html')
+
 
 ## basic exception handling
 
@@ -338,12 +369,14 @@ def handle_connection_error(err):
     """
     return 'docker host not found: ' + str(err), 500
 
+
 @app.errorhandler(docker.errors.DockerException)
 def handle_docker_error(err):
     """
     docker exception handler
     """
     return 'docker exception: ' + str(err), 500
+
 
 @app.errorhandler(Exception)
 def handle_generic_error(err):
@@ -353,6 +386,7 @@ def handle_generic_error(err):
     traceback.print_exc()
     return 'error: ' + str(err), 500
 
+
 # run app
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', debug=True, threaded=True)
+    app.run(host='0.0.0.0', debug=docopt['--debug'], threaded=True, port=int(docopt['--port']))
