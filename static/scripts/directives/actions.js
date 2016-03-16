@@ -96,7 +96,7 @@ angular.module('composeUiApp')
 
 
         $scope.combinedLogs = function () {
-          Logs.get({id: $scope.projectId, limit: 100}, function (data) {
+          Logs.get({id: $scope.projectId, limit: 2000}, function (data) {
             $scope.logs = logService.formatLogs(data.logs);
             $scope.showCombinedLogsDialog = true;
           });
