@@ -49,7 +49,7 @@ angular.module('composeUiApp')
 
         var stop = $interval(function () {
           refresh($scope.projectId);
-        }, 1000);
+        }, 5000);
         console.log('listen destroy');
         $scope.$on('$destroy', function () {
           console.log('destroy');
@@ -89,6 +89,15 @@ angular.module('composeUiApp')
             $scope.showDialog = true;
             $scope.logs = data.logs;
           });
+        };
+        $scope.logsfilter = "";
+        $scope.filterByString = function (obj) {
+          //console.log(obj, $scope.logsfilter);
+          if ($scope.logsfilter == "")
+            return true;
+          return obj.indexOf($scope.logsfilter) >= 0;
+
+
         };
 
         var Service = $resource('api/v1/services', null, {
