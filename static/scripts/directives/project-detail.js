@@ -19,7 +19,7 @@ angular.module('composeUiApp')
     }]);
 
 
-angular.module('composeUiApp')
+angular.module('composeUiApp', ['luegg.directives'])
   .directive('projectDetail', function ($resource, $log, projectService, $window, $interval) {
     return {
       restrict: 'E',
@@ -85,6 +85,7 @@ angular.module('composeUiApp')
         };
         $scope.displayLogs = function (id) {
           Logs.get({id: $scope.projectId, limit: 2000, container: id}, function (data) {
+            console.log('get logs', id);
             $scope.containerLogs = id;
             $scope.showDialog = true;
             $scope.logs = data.logs;
@@ -96,9 +97,21 @@ angular.module('composeUiApp')
           if ($scope.logsfilter == "")
             return true;
           return obj.indexOf($scope.logsfilter) >= 0;
-
-
         };
+
+        var stopRefreshLog;
+        $scope.$watch('showDialog', function () {
+          console.log('show dialog changed', $scope.showDialog);
+          if ($scope.showDialog) {
+            stopRefreshLog = $interval(function () {
+              $scope.displayLogs($scope.containerLogs);
+            }, 5000);
+          }
+          else {
+            if (stopRefreshLog)
+                $interval.cancel(stopRefreshLog);
+          }
+        });
 
         var Service = $resource('api/v1/services', null, {
           scale: {
