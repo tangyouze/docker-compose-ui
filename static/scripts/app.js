@@ -11,7 +11,8 @@
 angular
   .module('composeUiApp', [
     'ngResource',
-    'ngRoute'
+    'ngRoute',
+    'luegg.directives',
   ])
   .config(function ($routeProvider) {
     $routeProvider

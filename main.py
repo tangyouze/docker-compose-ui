@@ -40,7 +40,6 @@ logging.getLogger("requests").setLevel(logging.WARNING)
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 
 
-
 def get_project_with_name(name):
     """
     get docker compose project given a project name
@@ -87,9 +86,9 @@ def run_service(project, service_id):
     container.start()
 
     return jsonify( \
-            command='run %s/%s' % (project, service_id), \
-            name=container.name, \
-            id=container.id \
+        command='run %s/%s' % (project, service_id), \
+        name=container.name, \
+        id=container.id \
         )
 
 
@@ -111,18 +110,18 @@ def project_container(name, container_id):
     project = get_project_with_name(name)
     container = get_container_from_id(project.client, container_id)
     return jsonify(
-            id=container.id,
-            short_id=container.short_id,
-            human_readable_command=container.human_readable_command,
-            name=container.name,
-            name_without_project=container.name_without_project,
-            number=container.number,
-            ports=container.ports,
-            ip=container.get('NetworkSettings.IPAddress'),
-            labels=container.labels,
-            log_config=container.log_config,
-            image=container.image,
-            environment=container.environment
+        id=container.id,
+        short_id=container.short_id,
+        human_readable_command=container.human_readable_command,
+        name=container.name,
+        name_without_project=container.name_without_project,
+        number=container.number,
+        ports=container.ports,
+        ip=container.get('NetworkSettings.IPAddress'),
+        labels=container.labels,
+        log_config=container.log_config,
+        image=container.image,
+        environment=container.environment
     )
 
 
@@ -173,10 +172,10 @@ def up_():
     containers = get_project_with_name(name).up()
     logging.debug(containers)
     return jsonify(
-            {
-                'command': 'up',
-                'containers': map(lambda container: container.name, containers)
-            })
+        {
+            'command': 'up',
+            'containers': map(lambda container: container.name, containers)
+        })
 
 
 @app.route(API_V1 + "build", methods=['POST'])
@@ -283,7 +282,7 @@ def logs(name, limit):
     """
     lines = {}
     for k in get_project_with_name(name).containers(stopped=True):
-        lines[k.name] = k.logs(timestamps=True, tail=limit).split('\n')
+        lines[k.name] = k.logs(timestamps=False, tail=limit).split('\n')
 
     return jsonify(logs=lines)
 
@@ -296,8 +295,20 @@ def container_logs(name, container_id, limit):
     """
     project = get_project_with_name(name)
     container = get_container_from_id(project.client, container_id)
-    lines = container.logs(timestamps=True, tail=limit).split('\n')
+    lines = container.logs(timestamps=False, tail=limit).split('\n')
     return jsonify(logs=lines)
+
+
+@app.route(API_V1 + "containerid/<name>/<container_id>", methods=['GET'])
+def containerid(name, container_id):
+    """
+    docker-compose logs of a specific container
+    """
+    project = get_project_with_name(name)
+    container = get_container_from_id(project.client, container_id)
+    return jsonify({'cid': container.id})
+    # lines = container.logs(timestamps=False, tail=limit).split('\n')
+    # return jsonify(logs=lines)
 
 
 @app.route(API_V1 + "stop/<name>/<container_id>", methods=['GET'])

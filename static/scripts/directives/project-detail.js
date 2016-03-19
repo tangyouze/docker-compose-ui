@@ -19,7 +19,7 @@ angular.module('composeUiApp')
     }]);
 
 
-angular.module('composeUiApp', ['luegg.directives'])
+angular.module('composeUiApp')
   .directive('projectDetail', function ($resource, $log, projectService, $window, $interval) {
     return {
       restrict: 'E',
