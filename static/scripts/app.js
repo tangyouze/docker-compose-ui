@@ -13,6 +13,7 @@ angular
     'ngResource',
     'ngRoute',
     'luegg.directives',
+    'angularSpinner'
   ])
   .config(function ($routeProvider) {
     $routeProvider

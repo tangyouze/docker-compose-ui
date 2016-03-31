@@ -49,7 +49,7 @@ angular.module('composeUiApp')
 
         var stop = $interval(function () {
           refresh($scope.projectId);
-        }, 5000);
+        }, 3000);
         console.log('listen destroy');
         $scope.$on('$destroy', function () {
           console.log('destroy');
@@ -87,10 +87,12 @@ angular.module('composeUiApp')
           repeat = typeof repeat !== 'undefined' ? repeat : false;
           $scope.containerLogs = id;
           $scope.showDialog = true;
+          $scope.spinneron = true;
           if (!repeat)
             $scope.logs = [];
           Logs.get({id: $scope.projectId, limit: 2000, container: id}, function (data) {
             console.log('get logs', id);
+            $scope.spinneron = false;
             $scope.logs = data.logs;
           });
         };
@@ -107,7 +109,7 @@ angular.module('composeUiApp')
           if ($scope.showDialog) {
             stopRefreshLog = $interval(function () {
               $scope.displayLogs($scope.containerLogs, true);
-            }, 5000);
+            }, 1000);
           }
           else {
             if (stopRefreshLog)

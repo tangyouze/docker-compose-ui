@@ -41,13 +41,13 @@
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
           <h4 class="modal-title">{{ containerLogs }} logs</h4>
+          <div style="position: relative;">
+              <span us-spinner="{radius: 8, width:5, length:0}" spinner-on="spinneron"></span>
+          </div>
         </div>
         <div class="modal-body">
           Filter: <input type="text" ng-model="logsfilter" ng-model-options="{ updateOn: 'blur'}">
           <pre class="text-left logs" scroll-glue>{{ logs.filter(filterByString).join("\n") }}</pre>
-        </div>
-        <div class="modal-footer">
-          <button ng-click="displayLogs(containerLogs)" class="btn btn-default"><span class="glyphicon glyphicon-refresh"></span> refresh</button>
         </div>
       </div>
     </div>
