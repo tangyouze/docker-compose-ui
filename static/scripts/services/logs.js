@@ -4,9 +4,7 @@ angular.module('composeUiApp')
   .factory('logService', function () {
 
     function omitTimestamp(f) {
-
       var colors = [];
-
       return _.map(f, function (item) {
 
         var id = item.container;
@@ -24,10 +22,10 @@ angular.module('composeUiApp')
     }
 
     function sortByDate(data) {
-      return data.sort(function (a,b) {
-        if(a.text < b.text) {
+      return data.sort(function (a, b) {
+        if (a.text < b.text) {
           return -1;
-        } else if(a.text > b.text) {
+        } else if (a.text > b.text) {
           return 1;
         } else {
           return 0;

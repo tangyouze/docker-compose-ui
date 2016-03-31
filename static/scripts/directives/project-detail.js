@@ -34,7 +34,7 @@ angular.module('composeUiApp')
         var Host = $resource('api/v1/host');
         var Yml = $resource('api/v1/projects/yml/:id');
         var refresh = function (val) {
-          $log.debug('refresh ' + val);
+          // $log.debug('refresh project page ' + val);
           Project.get({id: val}, function (data) {
             $scope.services = projectService.groupByService(data);
           }, function (err) {
@@ -83,11 +83,14 @@ angular.module('composeUiApp')
             console.log('restart');
           });
         };
-        $scope.displayLogs = function (id) {
+        $scope.displayLogs = function (id, repeat) {
+          repeat = typeof repeat !== 'undefined' ? repeat : false;
+          $scope.containerLogs = id;
+          $scope.showDialog = true;
+          if (!repeat)
+            $scope.logs = [];
           Logs.get({id: $scope.projectId, limit: 2000, container: id}, function (data) {
             console.log('get logs', id);
-            $scope.containerLogs = id;
-            $scope.showDialog = true;
             $scope.logs = data.logs;
           });
         };
@@ -101,15 +104,14 @@ angular.module('composeUiApp')
 
         var stopRefreshLog;
         $scope.$watch('showDialog', function () {
-          console.log('show dialog changed', $scope.showDialog);
           if ($scope.showDialog) {
             stopRefreshLog = $interval(function () {
-              $scope.displayLogs($scope.containerLogs);
+              $scope.displayLogs($scope.containerLogs, true);
             }, 5000);
           }
           else {
             if (stopRefreshLog)
-                $interval.cancel(stopRefreshLog);
+              $interval.cancel(stopRefreshLog);
           }
         });
 
