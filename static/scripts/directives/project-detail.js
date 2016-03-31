@@ -19,6 +19,7 @@ angular.module('composeUiApp')
     }]);
 
 
+
 angular.module('composeUiApp')
   .directive('projectDetail', function ($resource, $log, projectService, $window, $interval) {
     return {
@@ -88,13 +89,20 @@ angular.module('composeUiApp')
           $scope.containerLogs = id;
           $scope.showDialog = true;
           $scope.spinneron = true;
-          if (!repeat)
+          if (!repeat) {
             $scope.logs = [];
-          Logs.get({id: $scope.projectId, limit: 2000, container: id}, function (data) {
-            console.log('get logs', id);
-            $scope.spinneron = false;
-            $scope.logs = data.logs;
-          });
+            Logs.get({id: $scope.projectId, limit: LOG_FETCH_LINES, container: id}, function (data) {
+              $scope.spinneron = false;
+              $scope.logs = data.logs;
+            });
+          }
+          else {
+            Logs.get({id: $scope.projectId, limit: LOG_FETCH_LINES_REPEAT, container: id}, function (data) {
+              $scope.spinneron = false;
+              $scope.logs = logMerge($scope.logs, data.logs);
+            });
+
+          }
         };
         $scope.logsfilter = "";
         $scope.filterByString = function (obj) {
@@ -109,7 +117,7 @@ angular.module('composeUiApp')
           if ($scope.showDialog) {
             stopRefreshLog = $interval(function () {
               $scope.displayLogs($scope.containerLogs, true);
-            }, 1000);
+            }, LOG_FETCH_INTERVAL);
           }
           else {
             if (stopRefreshLog)
@@ -161,3 +169,4 @@ angular.module('composeUiApp')
       }
     };
   });
+
